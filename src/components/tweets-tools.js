@@ -27,12 +27,12 @@ const ScriptletBox = ({ value, name }) => {
   )
 }
 
-const TweetJSON = styled.pre`
-  overflow-x: scroll;
-  background: #eee;
-  padding: 1rem;
-  border-radius: 0.5rem;
-`
+// const TweetJSON = styled.pre`
+//   overflow-x: scroll;
+//   background: #eee;
+//   padding: 1rem;
+//   border-radius: 0.5rem;
+// `
 
 const Margins = styled.div`
   display: flex;
@@ -84,10 +84,10 @@ const TweetsTools = ({ tweets }) => {
         {field}
       </label>)} */}
       <a download="tweets.json" href={URL.createObjectURL(blob)}>
-        Download JSON
+        Download queried tweets as JSON
       </a>
-      For reference, the first resulting tweet contains this data:
-      <TweetJSON>{JSON.stringify(tweets[0], null, 2)}</TweetJSON>
+      {/* For reference, the first resulting tweet contains this data:
+      <TweetJSON>{JSON.stringify(tweets[0], null, 2)}</TweetJSON> */}
     </Margins>
   )
 }

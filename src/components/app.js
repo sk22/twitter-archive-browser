@@ -174,6 +174,23 @@ const App = () => {
       <GlobalStyle />
       <Section>
         <SectionHeader>Load Tweet archive</SectionHeader>
+        {allTweets.length === 0 && (
+          <>
+            <p>
+              Use the file picker to upload your Twitter archive ZIP file, or
+              just the contained <code>tweet.js</code> file.
+            </p>
+            <p>
+              If you don't have a Twitter archive yet, you can request and
+              download it in your{' '}
+              <a href="https://twitter.com/settings/download_your_data">
+                Twitter settings
+              </a>
+              . In this case, see you in a few hours! (Or days, depending on
+              your Twitter usage)
+            </p>
+          </>
+        )}
         <TweetsLoader setTweets={setAllTweets} />
         {allTweets.length > 0 && (
           <TweetsLoaded>{allTweets.length} tweets loaded</TweetsLoaded>
