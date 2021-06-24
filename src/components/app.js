@@ -173,8 +173,8 @@ const App = () => {
         {allTweets.length === 0 && (
           <>
             <p>
-              Use the file picker to upload your Twitter archive ZIP file, or
-              just the contained <code>tweet.js</code> file.
+              Use the file picker to load your Twitter archive ZIP file, or just
+              the contained <code>tweet.js</code> file.
             </p>
             <p>
               If you don't have a Twitter archive yet, you can request and
@@ -188,9 +188,7 @@ const App = () => {
           </>
         )}
         <TweetsLoader setTweets={setAllTweets} />
-        {allTweets.length > 0 && (
-          <p>{allTweets.length} tweets loaded</p>
-        )}
+        {allTweets.length > 0 && <p>{allTweets.length} tweets loaded</p>}
       </Section>
       {allTweets.length > 0 && (
         <>
