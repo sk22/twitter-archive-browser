@@ -71,7 +71,9 @@ const TweetsTools = ({ tweets }) => {
 
   useEffect(() => {
     ;(async () => {
-      const res = await fetch(`${window.location.pathname}/tweet-utils.js`)
+      const res = await fetch(`${window.location.pathname}/tweet-utils.js`, {
+        cache: 'reload'
+      })
       const tweetUtils = await res.text()
       setTweetUtils(tweetUtils)
     })()
