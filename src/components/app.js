@@ -179,7 +179,11 @@ const App = () => {
             <p>
               If you don't have a Twitter archive yet, you can request and
               download it in your{' '}
-              <a href="https://twitter.com/settings/download_your_data">
+              <a
+                href="https://twitter.com/settings/download_your_data"
+                target="_blank"
+                rel="noreferrer"
+              >
                 Twitter settings
               </a>
               . In this case, see you in a few hours! (Or days, depending on
@@ -318,7 +322,11 @@ const App = () => {
               >
                 <Tweet className="twitter-tweet">
                   <p dangerouslySetInnerHTML={{ __html: tweet.full_text }} />
-                  <a href={`https://twitter.com/_/status/${tweet.id}`}>
+                  <a
+                    href={`https://twitter.com/_/status/${tweet.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     {tweet.created_at}
                   </a>
                 </Tweet>
