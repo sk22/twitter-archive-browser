@@ -48,7 +48,8 @@ function tweetUtils(callback, args) {
         },
         body,
         method: 'POST',
-        mode: 'cors'
+        mode: 'cors',
+        cache: 'no-store'
       })
     },
 
