@@ -11,7 +11,7 @@ export default function tweetUtils(cb) {
   const getTweetId = (t) =>
     tweetUrlRegex.test(t) ? t.match(tweetUrlRegex)[1] : t
 
-  const utils = (window.tweetUtils = {
+  const utils = {
     async getBearerToken() {
       const mainScriptSrc = document.querySelector('script[src*=\\/main]').src
       const mainScriptText = await (await fetch(mainScriptSrc)).text()
@@ -88,7 +88,7 @@ export default function tweetUtils(cb) {
             .join('\n')
       )
     }
-  })
+  }
 
   cb(utils)
   return utils

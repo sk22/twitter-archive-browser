@@ -12,6 +12,14 @@ const TextFormRow = styled(FormRow)`
   }
 `
 
+const link =
+  `${window.location.hostname}:${window.location.port}` +
+  `${window.location.pathname}`
+const min = (c) => {
+  const { code, error } = minify(c)
+  return error ? error.toString() : `/* via ${link} */ ${code}`
+}
+
 const ScriptletBox = ({ value, name }) => {
   const inputRef = useRef()
   return (
@@ -59,9 +67,8 @@ const TweetsTools = ({ tweets }) => {
     type: 'application/json'
   })
 
-  const { code: deleteScript } = minify(`
-    ${tweetUtils.toString()}
-    tweetUtils(utils => utils
+  const deleteScript = min(`
+    (${tweetUtils.toString()})(utils => utils
       .deleteTweets(${JSON.stringify(ids)})
       .then(utils.alertResponses))
   `)
