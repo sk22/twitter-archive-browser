@@ -11,6 +11,17 @@ export default function tweetUtils(callback, args) {
   const getTweetId = (t) =>
     tweetUrlRegex.test(t) ? t.match(tweetUrlRegex)[1] : t
 
+  const getStatus = (res) => {
+    if (res.statusText.length > 0) return res.statusText
+    const names = {
+      200: 'OK',
+      404: 'Not Found',
+      403: 'Forbidden',
+      401: 'Unauthorized'
+    }
+    return names[res.status] || `HTTP ${res.status}`
+  }
+
   const utils = {
     async getBearerToken() {
       const mainScriptSrc = document.querySelector('script[src*=\\/main]').src
@@ -74,17 +85,14 @@ export default function tweetUtils(callback, args) {
         responses.map((res) => res.json())
       )
       console.log(jsonResponses)
-      const codes = responses.reduce(
-        (pre, cur) => ({
-          ...pre,
-          [cur.statusText]: (pre[cur.statusText] || 0) + 1
-        }),
-        {}
-      )
+      const codes = responses.reduce((obj, res) => {
+        const status = getStatus(res)
+        return { ...obj, [status]: (obj[status] || 0) + 1 }
+      }, {})
       alert(
         'Done!\n' +
           Object.keys(codes)
-            .map((code) => `${code}: ${codes[code]}`)
+            .map((code) => `${code} × ${codes[code]}`)
             .join('\n')
       )
     }

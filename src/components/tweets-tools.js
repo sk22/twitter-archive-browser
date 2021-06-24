@@ -1,6 +1,5 @@
 import React, { useRef } from 'react'
 import styled from 'styled-components'
-import { minify } from 'terser'
 import tweetUtils from '../lib/browser-tweet-utils'
 import { FormRow } from './form'
 import { SectionDivider, SectionHeader } from './section'
@@ -14,12 +13,8 @@ const TextFormRow = styled(FormRow)`
 
 const link = window.location.hostname + window.location.pathname
 
-const min = (args) => (fn) => {
-  const { code, error } = minify(
-    `(${tweetUtils})(${fn}, ${JSON.stringify(args)})`
-  )
-  return error ? error.toString() : `${code} /* via ${link} */`
-}
+const min = (args) => (fn) =>
+  `!(${tweetUtils})(${fn}, ${JSON.stringify(args)}) /* via ${link} */`
 
 const ScriptletBox = ({ value, name }) => {
   const inputRef = useRef()
