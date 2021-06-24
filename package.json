@@ -1,6 +1,7 @@
 {
   "name": "twitter-archive-browser",
   "version": "0.1.0",
+  "homepage": "https://sk22.github.io/twitter-archive-browser",
   "private": true,
   "dependencies": {
     "jszip": "^3.6.0",
