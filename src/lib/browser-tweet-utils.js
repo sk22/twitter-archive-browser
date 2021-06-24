@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-export default function tweetUtils(cb) {
+export default function tweetUtils(callback, args) {
   const getCookie = (name) =>
     document.cookie
       .split(';')
@@ -90,7 +90,7 @@ export default function tweetUtils(cb) {
     }
   }
 
-  cb(utils)
+  callback(utils, args)
   return utils
 }
 
