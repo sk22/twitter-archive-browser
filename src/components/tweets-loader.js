@@ -1,5 +1,5 @@
 import JSZip from 'jszip'
-import React, { createRef, useState } from 'react'
+import React, { createRef, useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 const ErrorOutput = styled.div`
@@ -12,25 +12,38 @@ const FileInput = styled.input`
 
 const TweetsLoader = ({ setTweets }) => {
   const [error, setError] = useState(null)
-  const inputRef = createRef()
+  const [status, setStatus] = useState(null)
+  const [tweetJs, setTweetJs] = useState(null)
 
-  const handleTweets = ({ tweet }) => {
-    const partNames = Object.keys(tweet)
-    const allTweets = partNames
-      .flatMap((partName) => tweet[partName])
-      .filter((item) => Boolean(item.tweet))
-      .map((item) => item.tweet)
-    setTweets(allTweets)
-  }
+  const inputRef = createRef()
 
   const handleTweetJs = (jsText) => {
     window.YTD = { tweet: {} }
-    eval(jsText) // eslint-disable-line
-    handleTweets(window.YTD)
+    setStatus('Loading…')
+    setTweetJs(jsText)
   }
+
+  useEffect(() => {
+    const handleTweets = ({ tweet }) => {
+      const partNames = Object.keys(tweet)
+      const allTweets = partNames
+        .flatMap((partName) => tweet[partName])
+        .filter((item) => Boolean(item.tweet))
+        .map((item) => item.tweet)
+      setTweets(allTweets)
+    }
+    if (tweetJs) {
+      eval(tweetJs) // eslint-disable-line
+      handleTweets(window.YTD)
+      setStatus(null)
+      setTweetJs(null)
+    }
+  }, [tweetJs, setTweets])
 
   const handleFileChange = async () => {
     setError(null)
+    setTweets([])
+    setStatus('Reading…')
     if (inputRef.current) {
       const file = inputRef.current.files[0]
       if (file && file.name.endsWith('.js')) {
@@ -41,6 +54,7 @@ const TweetsLoader = ({ setTweets }) => {
         })
         reader.addEventListener('error', (err) => {
           setError(['file', err.toString()])
+          setStatus(null)
         })
       } else if (file && file.name.endsWith('.zip')) {
         try {
@@ -51,6 +65,7 @@ const TweetsLoader = ({ setTweets }) => {
         } catch (err) {
           setError(['zip', err.toString()])
           console.error(err)
+          setStatus(null)
         }
       }
     }
@@ -77,6 +92,7 @@ const TweetsLoader = ({ setTweets }) => {
           <pre>{error[1]}</pre>
         </ErrorOutput>
       )}
+      {status && <p>{status}</p>}
     </>
   )
 }

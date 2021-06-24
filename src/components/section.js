@@ -7,6 +7,14 @@ const section = css`
   border-radius: 0.5rem;
   border: var(--border);
   margin: 10px 0;
+
+  & > p:last-child {
+    margin-bottom: 0;
+  }
+
+  & > p:first-child {
+    margin-top: 0;
+  }
 `
 
 const Section = styled.section`

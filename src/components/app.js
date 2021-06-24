@@ -46,10 +46,6 @@ const Main = styled.main`
   }
 `
 
-const TweetsLoaded = styled.p`
-  margin-bottom: 0;
-`
-
 const Line = styled.hr`
   border: none;
   border-top: var(--border-strong);
@@ -193,7 +189,7 @@ const App = () => {
         )}
         <TweetsLoader setTweets={setAllTweets} />
         {allTweets.length > 0 && (
-          <TweetsLoaded>{allTweets.length} tweets loaded</TweetsLoaded>
+          <p>{allTweets.length} tweets loaded</p>
         )}
       </Section>
       {allTweets.length > 0 && (
