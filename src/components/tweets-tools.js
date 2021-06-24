@@ -12,12 +12,10 @@ const TextFormRow = styled(FormRow)`
   }
 `
 
-const link =
-  `${window.location.hostname}:${window.location.port}` +
-  `${window.location.pathname}`
+const link = `${window.location.hostname}${window.location.pathname}`
 const min = (c) => {
   const { code, error } = minify(c)
-  return error ? error.toString() : `/* via ${link} */ ${code}`
+  return error ? error.toString() : `${code} /* via ${link} */`
 }
 
 const ScriptletBox = ({ value, name }) => {
