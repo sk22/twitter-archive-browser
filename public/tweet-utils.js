@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-export default function tweetUtils(callback, args) {
+function tweetUtils(callback, args) {
   const getCookie = (name) =>
     document.cookie
       .split(';')
@@ -90,10 +90,9 @@ export default function tweetUtils(callback, args) {
         return { ...obj, [status]: (obj[status] || 0) + 1 }
       }, {})
       alert(
-        'Done!\n' +
-          Object.keys(codes)
-            .map((code) => `${code} × ${codes[code]}`)
-            .join('\n')
+        Object.keys(codes)
+          .map((code) => `${code} × ${codes[code]}`)
+          .join('\n')
       )
     }
   }
@@ -101,5 +100,3 @@ export default function tweetUtils(callback, args) {
   callback(utils, args)
   return utils
 }
-
-// tweetUtils().promptDeleteTweets()

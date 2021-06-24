@@ -1,6 +1,6 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import tweetUtils from '../lib/browser-tweet-utils'
+import { minify } from 'terser'
 import { FormRow } from './form'
 import { SectionDivider, SectionHeader } from './section'
 
@@ -12,9 +12,6 @@ const TextFormRow = styled(FormRow)`
 `
 
 const link = window.location.hostname + window.location.pathname
-
-const min = (args) => (fn) =>
-  `!(${tweetUtils})(${fn}, ${JSON.stringify(args)}) /* via ${link} */`
 
 const ScriptletBox = ({ value, name }) => {
   const inputRef = useRef()
@@ -49,6 +46,8 @@ const Margins = styled.div`
 `
 
 const TweetsTools = ({ tweets }) => {
+  const [tweetUtils, setTweetUtils] = useState(null)
+
   const ids = tweets.map((t) => t.id)
   // const fields = useMemo(() => {
   //   let fs = []
@@ -63,6 +62,21 @@ const TweetsTools = ({ tweets }) => {
     type: 'application/json'
   })
 
+  const min = (args) => (fn) => {
+    const { code, error } = minify(
+      `(${tweetUtils})(${fn}, ${JSON.stringify(args)})`
+    )
+    return error ? error.toString() : `${code} /* via ${link} */`
+  }
+
+  useEffect(() => {
+    ;(async () => {
+      const res = await fetch(`${window.location.pathname}/tweet-utils.js`)
+      const tweetUtils = await res.text()
+      setTweetUtils(tweetUtils)
+    })()
+  }, [])
+
   const deleteScript = min({ ids })((utils, { ids }) =>
     utils.deleteTweets(ids).then(utils.alertResponses)
   )
@@ -73,11 +87,17 @@ const TweetsTools = ({ tweets }) => {
         <div>Tweet IDs:</div>
         <input type="text" disabled={true} value={ids.join(',')} />
       </TextFormRow>
-      <small>
-        Copy one of these scripts into your Twitter tab's browser console
-        (Chrome and Firefox: CTRL/CMD+Shift+I, then click on "Console")
-      </small>
-      <ScriptletBox name="Delete tweets" value={deleteScript} />
+      {tweetUtils ? (
+        <>
+          <small>
+            Copy one of these scripts into your Twitter tab's browser console
+            (Chrome and Firefox: CTRL/CMD+Shift+I, then click on "Console")
+          </small>
+          <ScriptletBox name="Delete tweets" value={deleteScript} />
+        </>
+      ) : (
+        <p>Tweet utils loading…</p>
+      )}
       <SectionDivider />
       <SectionHeader>Download data</SectionHeader>
       {/* {fields.map(field => <label key={field}>
