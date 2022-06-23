@@ -18,7 +18,12 @@ const ScriptletBox = ({ value, name }) => {
   return (
     <TextFormRow>
       <div>{name}:</div>
-      <input type="text" disabled={true} ref={inputRef} value={value} />
+      <input
+        type="text"
+        disabled={true}
+        ref={inputRef}
+        value={value ?? 'Loading…'}
+      />
       <button
         onClick={() => navigator.clipboard.writeText(inputRef.current.value)}
       >
@@ -47,6 +52,7 @@ const Margins = styled.div`
 
 const TweetsTools = ({ tweets }) => {
   const [tweetUtils, setTweetUtils] = useState(null)
+  const [deleteScript, setDeleteScript] = useState(null)
 
   const ids = tweets.map((t) => t.id)
   // const fields = useMemo(() => {
@@ -62,8 +68,8 @@ const TweetsTools = ({ tweets }) => {
     type: 'application/json'
   })
 
-  const min = (args) => (fn) => {
-    const { code, error } = minify(
+  const min = (args) => async (fn) => {
+    const { code, error } = await minify(
       `(${tweetUtils})(${fn}, ${JSON.stringify(args)})`
     )
     return error ? error.toString() : `${code} /* via ${link} */`
@@ -79,9 +85,14 @@ const TweetsTools = ({ tweets }) => {
     })()
   }, [])
 
-  const deleteScript = min({ ids })((utils, { ids }) =>
-    utils.deleteTweets(ids).then(utils.alertResponses)
-  )
+  useEffect(() => {
+    ;(async () => {
+      const script = await min({ ids })((utils, { ids }) =>
+        utils.deleteTweets(ids).then(utils.alertResponses)
+      )
+      setDeleteScript(script)
+    })()
+  })
 
   return (
     <Margins>
