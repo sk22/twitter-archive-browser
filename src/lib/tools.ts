@@ -109,8 +109,8 @@ export default function browserTweetTools(
       status[res.status]++
     })
     return (
-      `current: ${getCurrentProgress()}/${drafts}\n` +
-      `responses: ${responses.length}\n\n` +
+      `responses: ${responses.length}\n` +
+      `current: ${getCurrentProgress()}/${drafts}\n\n` +
       Object.keys(status)
         .map(
           (code) =>
@@ -239,7 +239,7 @@ export default function browserTweetTools(
         reporter(
           reportHeader +
             getStatusReport(results, requestNow.length, getCurrentProgress) +
-            `\nhit rate limit. continuing in ${seconds}s…`
+            `\nhit rate limit.\ncontinuing in ${seconds}s…`
         )
         seconds--
       }
