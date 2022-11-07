@@ -15,8 +15,9 @@ export default function browserTweetTools(
   abortController.signal.addEventListener('abort', () => {
     console.log('aborting mission')
   })
-  
-  const maxConcurrent = args.maxConcurrent ?? 100
+
+  const maxConcurrent =
+    typeof args.maxConcurrent === 'number' ? args.maxConcurrent : 100
   //#endregion
 
   //#region helper functions
