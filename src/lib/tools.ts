@@ -15,9 +15,15 @@ export default function browserTweetTools(
   abortController.signal.addEventListener('abort', () => {
     console.log('aborting mission')
   })
-
   const maxConcurrent =
     typeof args.maxConcurrent === 'number' ? args.maxConcurrent : 100
+  const statusNames = {
+    200: 'OK',
+    404: 'Not Found',
+    403: 'Forbidden',
+    401: 'Unauthorized',
+    429: 'Too Many Requests'
+  }
   //#endregion
 
   //#region helper functions
@@ -106,7 +112,12 @@ export default function browserTweetTools(
       `current: ${getCurrentProgress()}/${drafts}\n` +
       `responses: ${responses.length}\n\n` +
       Object.keys(status)
-        .map((code) => `${code} × ${status[code]}`)
+        .map(
+          (code) =>
+            `${(statusNames as Record<string, string>)[code] ?? code} × ${
+              status[code]
+            }`
+        )
         .join('\n') +
       '\n'
     )
