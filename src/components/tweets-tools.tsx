@@ -58,7 +58,7 @@ const Margins = styled.div`
 `
 
 const TweetsTools = ({ tweets }: { tweets: Tweet[] }) => {
-  const [deleteScript, setDeleteScript] = useState<string>()
+  const [deleteScript, setDeleteScript] = useState<string>('Loading…')
 
   const ids = tweets.map((t) => t.id)
   // const fields = useMemo(() => {
@@ -98,17 +98,11 @@ const TweetsTools = ({ tweets }: { tweets: Tweet[] }) => {
         <div>Tweet IDs:</div>
         <input type="text" disabled={true} value={ids.join(',')} />
       </TextFormRow>
-      {/* {tweetUtils ? ( */}
-      <>
         <small>
           Copy one of these scripts into your Twitter tab's browser console
           (Chrome and Firefox: Ctrl/Cmd+Shift+I, then click on "Console")
         </small>
         <ScriptletBox name="Delete tweets" value={deleteScript} />
-      </>
-      {/* ) : (
-        <p>Tweet utils loading…</p>
-      )} */}
       <SectionDivider />
       <SectionHeader>Download data</SectionHeader>
       {/* {fields.map(field => <label key={field}>
