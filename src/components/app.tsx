@@ -1,10 +1,10 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { ChangeEvent, useMemo, useRef, useState } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import Section, { SectionDivider, SectionHeader, TweetSection } from './section'
 import TweetsLoader from './tweets-loader'
 import TweetsSelect from './tweets-select'
 import TweetsFilter from './tweets-filter'
-import { createDayString, sortModes } from '../lib/utils'
+import { createDayString, sortModes, Tweet } from '../lib/utils'
 import { FormRow } from './form'
 import { debounce } from 'lodash'
 import TweetsTools from './tweets-tools'
@@ -21,12 +21,34 @@ const GlobalStyle = createGlobalStyle`
   }
 
   :root {
-    --border: 1px solid #ccc;
-    --border-strong: 1.3px solid #666;
+    --border-color: #ccc;
+    --border-strong-color: #666;
+    --border: 1px solid var(--border-color);
+    --border-strong: 1.3px solid var(--border-strong-color);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --border-color: #666;
+      --border-strong-color: #999;
+    }
+
+    html {
+      background: #0a0a0a;
+      color: white;
+    }
+
+    a {
+      color: deepskyblue;
+    }
+
+    input, button {
+      filter: invert();
+    }
   }
 `
 
-const Tweet = styled.blockquote`
+const TweetQuote = styled.blockquote`
   white-space: pre-wrap;
   word-break: break-word;
 `
@@ -67,18 +89,18 @@ const tweetTypesOptions = {
   regular: 'Regular tweets',
   replies: 'Replies',
   retweets: 'Retweets'
-}
+} as const
 
 const App = () => {
-  const [allTweets, setAllTweets] = useState([])
-  const [queriedTweets, setQueriedTweets] = useState([])
+  const [allTweets, setAllTweets] = useState<Tweet[]>([])
+  const [queriedTweets, setQueriedTweets] = useState<Tweet[]>([])
   const [filterText, setFilterText] = useState('')
   const [showTweets, setShowTweets] = useState(true)
   const [searchString, setSearchString] = useState('')
   const [customExpression, setCustomExpression] = useState('')
   const [isRegExp, setIsRegExp] = useState(false)
   const [caseSensitive, setCaseSensitive] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const [includeTweets, setIncludeTweets] = useState({
     regular: true,
     replies: true,
@@ -90,8 +112,8 @@ const App = () => {
     [allTweets]
   )
 
-  const tweetIsRetweet = (tweet) => tweet.full_text.startsWith('RT @')
-  const tweetIsReply = (tweet) => 'in_reply_to_screen_name' in tweet
+  const tweetIsRetweet = (tweet: Tweet) => tweet.full_text.startsWith('RT @')
+  const tweetIsReply = (tweet: Tweet) => 'in_reply_to_screen_name' in tweet
 
   const tweets = useMemo(() => {
     try {
@@ -107,7 +129,7 @@ const App = () => {
       return tweetsSorted
         .filter((tweet) => {
           if (isRegExp) {
-            return regExp.test(tweet.full_text)
+            return regExp?.test(tweet.full_text)
           } else {
             const text = caseSensitive
               ? tweet.full_text
@@ -130,10 +152,10 @@ const App = () => {
           )
         })
         .filter((t) => {
-          return hasCustomExpression ? func(t) : true
+          return hasCustomExpression ? func?.(t) : true
         })
     } catch (err) {
-      setError(err.toString())
+      setError((err as Error)?.toString())
       return []
     }
   }, [
@@ -145,8 +167,8 @@ const App = () => {
     customExpression
   ])
 
-  const tweetsPerDay = useMemo(() => {
-    const obj = {}
+  const tweetsPerDay: Record<string, number> = useMemo(() => {
+    const obj: typeof tweetsPerDay = {}
     tweets.forEach((tweet) => {
       const dateString = createDayString(tweet.created_at)
       obj[dateString] = (obj[dateString] || 0) + 1
@@ -154,15 +176,23 @@ const App = () => {
     return obj
   }, [tweets])
 
-  const isTweetHidden = (tweet) =>
+  const isTweetHidden = (tweet: Tweet) =>
     !tweet.full_text.toLowerCase().includes(filterText.toLowerCase())
 
   const handleChangeCustomExpression = useRef(
-    debounce((event) => setCustomExpression(event.target.value), 600)
+    debounce(
+      (event: ChangeEvent<HTMLInputElement>) =>
+        setCustomExpression(event.target.value),
+      600
+    )
   ).current
 
   const handleChangeSearchText = useRef(
-    debounce((event) => setSearchString(event.target.value), 600)
+    debounce(
+      (event: ChangeEvent<HTMLInputElement>) =>
+        setSearchString(event.target.value),
+      600
+    )
   ).current
 
   return (
@@ -174,7 +204,7 @@ const App = () => {
           <>
             <p>
               Use the file picker to load your Twitter archive ZIP file, or just
-              the contained <code>tweet.js</code> file.
+              the contained <code>tweets.js</code> file.
             </p>
             <p>
               If you don't have a Twitter archive yet, you can request and
@@ -270,7 +300,11 @@ const App = () => {
             <SectionDivider />
             <FormRow>
               <span>Include</span>
-              {Object.keys(tweetTypesOptions).map((mode) => (
+              {(
+                Object.keys(
+                  tweetTypesOptions
+                ) as (keyof typeof tweetTypesOptions)[]
+              ).map((mode: keyof typeof tweetTypesOptions) => (
                 <label key={mode}>
                   <input
                     type="checkbox"
@@ -308,10 +342,7 @@ const App = () => {
           {showTweets && (
             <>
               <Line />
-              <TweetsFilter
-                filterText={filterText}
-                setFilterText={(text) => setFilterText(text)}
-              />
+              <TweetsFilter setFilterText={(text) => setFilterText(text)} />
             </>
           )}
           {showTweets &&
@@ -320,7 +351,7 @@ const App = () => {
                 key={tweet.id}
                 style={isTweetHidden(tweet) ? { display: 'none' } : {}}
               >
-                <Tweet className="twitter-tweet">
+                <TweetQuote className="twitter-tweet">
                   <p dangerouslySetInnerHTML={{ __html: tweet.full_text }} />
                   <a
                     href={`https://twitter.com/_/status/${tweet.id}`}
@@ -329,7 +360,7 @@ const App = () => {
                   >
                     {tweet.created_at}
                   </a>
-                </Tweet>
+                </TweetQuote>
               </TweetSection>
             ))}
           <Line />

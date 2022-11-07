@@ -1,6 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import styled from 'styled-components'
 import { minify } from 'terser'
+import browserTweetTools, { TweetToolbox } from '../lib/tools'
+import { Tweet } from '../lib/utils'
 import { FormRow } from './form'
 import { SectionDivider, SectionHeader } from './section'
 
@@ -13,8 +15,8 @@ const TextFormRow = styled(FormRow)`
 
 const link = window.location.hostname + window.location.pathname
 
-const ScriptletBox = ({ value, name }) => {
-  const inputRef = useRef()
+const ScriptletBox = ({ value, name }: { value?: string; name: string }) => {
+  const inputRef = useRef<HTMLInputElement | null>(null)
   return (
     <TextFormRow>
       <div>{name}:</div>
@@ -25,7 +27,12 @@ const ScriptletBox = ({ value, name }) => {
         value={value ?? 'Loading…'}
       />
       <button
-        onClick={() => navigator.clipboard.writeText(inputRef.current.value)}
+        onClick={() =>
+          void (
+            inputRef.current &&
+            navigator.clipboard.writeText(inputRef.current.value)
+          )
+        }
       >
         Copy
       </button>
@@ -50,9 +57,8 @@ const Margins = styled.div`
   }
 `
 
-const TweetsTools = ({ tweets }) => {
-  const [tweetUtils, setTweetUtils] = useState(null)
-  const [deleteScript, setDeleteScript] = useState(null)
+const TweetsTools = ({ tweets }: { tweets: Tweet[] }) => {
+  const [deleteScript, setDeleteScript] = useState<string>()
 
   const ids = tweets.map((t) => t.id)
   // const fields = useMemo(() => {
@@ -68,31 +74,23 @@ const TweetsTools = ({ tweets }) => {
     type: 'application/json'
   })
 
-  const min = (args) => async (fn) => {
-    const { code, error } = await minify(
-      `(${tweetUtils})(${fn}, ${JSON.stringify(args)})`
-    )
-    return error ? error.toString() : `${code} /* via ${link} */`
-  }
-
-  useEffect(() => {
-    ;(async () => {
-      const res = await fetch(`${window.location.pathname}/tweet-utils.js`, {
-        cache: 'reload'
-      })
-      const tweetUtils = await res.text()
-      setTweetUtils(tweetUtils)
-    })()
+  const min = useCallback(function min<T>(args: T) {
+    return async (fn: (toolbox: TweetToolbox, args: T) => void) => {
+      const { code } = await minify(
+        `(${browserTweetTools.toString()})(${fn}, ${JSON.stringify(args)})`
+      )
+      return `${code} /* via ${link} */`
+    }
   }, [])
 
   useEffect(() => {
     ;(async () => {
       const script = await min({ ids })((utils, { ids }) =>
-        utils.deleteTweets(ids).then(utils.alertResponses)
+        utils.deleteTweets(ids)
       )
       setDeleteScript(script)
     })()
-  })
+  }, [ids, min])
 
   return (
     <Margins>
@@ -100,17 +98,17 @@ const TweetsTools = ({ tweets }) => {
         <div>Tweet IDs:</div>
         <input type="text" disabled={true} value={ids.join(',')} />
       </TextFormRow>
-      {tweetUtils ? (
-        <>
-          <small>
-            Copy one of these scripts into your Twitter tab's browser console
-            (Chrome and Firefox: CTRL/CMD+Shift+I, then click on "Console")
-          </small>
-          <ScriptletBox name="Delete tweets" value={deleteScript} />
-        </>
-      ) : (
+      {/* {tweetUtils ? ( */}
+      <>
+        <small>
+          Copy one of these scripts into your Twitter tab's browser console
+          (Chrome and Firefox: Ctrl/Cmd+Shift+I, then click on "Console")
+        </small>
+        <ScriptletBox name="Delete tweets" value={deleteScript} />
+      </>
+      {/* ) : (
         <p>Tweet utils loading…</p>
-      )}
+      )} */}
       <SectionDivider />
       <SectionHeader>Download data</SectionHeader>
       {/* {fields.map(field => <label key={field}>

@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   injectScript,
   createDateString,
   sortModes,
-  unixDay
+  unixDay,
+  Tweet
 } from '../lib/utils'
 import styled from 'styled-components'
 import { FormRow } from './form'
@@ -24,29 +25,30 @@ const DateRange = styled.input`
   width: 100%;
 `
 
-const TweetsSelect = ({
-  tweets,
-  tweetsPerDay,
-  handleQueryTweets: handleLoadTweets
+const TweetsSelect = (props: {
+  tweets: Tweet[]
+  tweetsPerDay: Record<string, number>
+  handleQueryTweets: (tweets: Tweet[], showTweets: boolean) => void
 }) => {
+  const { tweets, tweetsPerDay, handleQueryTweets } = props
   const [amountState, setAmountState] = useState(1)
   const [nonZeroAmountState, setNonZeroAmountState] = useState(1)
-  const [sortMode, setSortMode] = useState('newest')
+  const [sortMode, setSortMode] = useState<keyof typeof sortModes>('newest')
   const [embedTweets, setEmbedTweets] = useState(true)
   const [showTweets, setShowTweets] = useState(true)
 
-  const sinceRef = useRef()
-  const untilRef = useRef()
-  const amountRef = useRef()
+  const sinceRef = useRef<HTMLInputElement | null>(null)
+  const untilRef = useRef<HTMLInputElement | null>(null)
+  const amountRef = useRef<HTMLInputElement | null>(null)
 
-  const setAmount = (amount) => {
+  const setAmount = (amount: number) => {
     setAmountState(amount)
     if (amount > 0) setNonZeroAmountState(amount)
     setEmbedTweets(amount < 30)
     setShowTweets(amount < 100)
   }
 
-  const handleAmountChange = (event) =>
+  const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) =>
     setAmount(event.target.valueAsNumber || Number(event.target.value))
 
   const oldestTime = new Date(tweets[0].created_at).getTime()
@@ -55,21 +57,28 @@ const TweetsSelect = ({
   const [sinceTime, setSinceTime] = useState(oldestTime)
   const [untilTime, setUntilTime] = useState(newestTime)
 
-  const resetTime = (set, time, resetTime) => isNaN(time) && set(resetTime)
-
-  useEffect(
-    () => resetTime(setSinceTime, sinceTime, oldestTime),
-    [sinceTime, oldestTime]
+  const resetTime = useCallback(
+    (
+      set: typeof setSinceTime,
+      time: typeof sinceTime,
+      resetTime: typeof oldestTime
+    ) => void (isNaN(time) && set(resetTime)),
+    []
   )
 
   useEffect(
-    () => resetTime(setUntilTime, untilTime, newestTime),
-    [untilTime, newestTime]
+    () => void resetTime(setSinceTime, sinceTime, oldestTime),
+    [sinceTime, oldestTime, resetTime]
+  )
+
+  useEffect(
+    () => void resetTime(setUntilTime, untilTime, newestTime),
+    [untilTime, newestTime, resetTime]
   )
 
   const amountInRange = useMemo(() => {
-    const isDayInRange = (day) => {
-      const beginningOfDay = new Date(day).getTime()
+    const isDayInRange = (dayDateString: string) => {
+      const beginningOfDay = new Date(dayDateString).getTime()
       return (
         beginningOfDay + unixDay >= sinceTime &&
         beginningOfDay - unixDay <= untilTime
@@ -91,17 +100,19 @@ const TweetsSelect = ({
   }, [amountInRange, amountState, nonZeroAmountState])
 
   useEffect(() => {
-    if (oldestTime > sinceRef.current.valueAsNumber) setSinceTime(oldestTime)
+    if (sinceRef.current && oldestTime > sinceRef.current.valueAsNumber)
+      setSinceTime(oldestTime)
   }, [oldestTime])
 
   useEffect(() => {
-    if (newestTime < untilRef.current.valueAsNumber) setUntilTime(newestTime)
+    if (untilRef.current && newestTime < untilRef.current.valueAsNumber)
+      setUntilTime(newestTime)
   }, [newestTime])
 
   const handleClickQuery = () => {
-    const queriedTweets = tweets.filter((tweet) => {
-      const since = sinceRef.current.valueAsDate
-      const until = untilRef.current.valueAsDate
+    const queriedTweets = tweets.filter((tweet: Tweet) => {
+      const since = sinceRef.current?.valueAsDate
+      const until = untilRef.current?.valueAsDate
       if (!since || !until) return false
 
       const date = new Date(tweet.created_at)
@@ -115,7 +126,7 @@ const TweetsSelect = ({
       return true
     })
 
-    handleLoadTweets(
+    handleQueryTweets(
       sortModes[sortMode].fn(queriedTweets, amountState),
       showTweets
     )

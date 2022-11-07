@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-export const FormRow = styled.div`
+export const FormRow = styled.label`
   display: flex;
   align-items: center;
   margin: 0.8rem 0;

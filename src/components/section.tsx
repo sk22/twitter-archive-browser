@@ -15,6 +15,10 @@ const section = css`
   & > p:first-child {
     margin-top: 0;
   }
+
+  @media (prefers-color-scheme: dark) {
+    background: #111;
+  }
 `
 
 const Section = styled.section`

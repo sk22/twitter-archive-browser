@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { ChangeEvent, useState } from 'react'
 import styled from 'styled-components'
 
 const StyledInput = styled.input`
@@ -6,10 +6,11 @@ const StyledInput = styled.input`
   margin-bottom: 1rem;
 `
 
-const TweetsFilter = ({ setFilterText }) => {
+const TweetsFilter = (props: { setFilterText: (text: string) => void }) => {
+  const { setFilterText } = props
   const [currentText, setCurrentText] = useState('')
 
-  const handleChange = (event) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setCurrentText(event.target.value)
     setFilterText(event.target.value)
   }

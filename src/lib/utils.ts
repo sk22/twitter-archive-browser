@@ -1,3 +1,11 @@
+export type Tweet = {
+  id: string
+  created_at: string
+  full_text: string
+  in_reply_to_screen_name?: string
+  favorite_count: number
+}
+
 /**
  * Returns a random integer between min (inclusive) and max (inclusive).
  * The value is no lower than min (or the next integer greater than min
@@ -5,7 +13,7 @@
  * lower than max if max isn't an integer).
  * Using Math.round() will give you a non-uniform distribution!
  */
-function getRandomInt(min, max) {
+function getRandomInt(min: number, max: number) {
   min = Math.ceil(min)
   max = Math.floor(max)
   return Math.floor(Math.random() * (max - min + 1)) + min
@@ -13,14 +21,14 @@ function getRandomInt(min, max) {
 
 const makeCreatedComparator =
   (invert = false) =>
-  (t1, t2) => {
-    const getTime = (tweet) => new Date(tweet.created_at).getTime()
+  (t1: Tweet, t2: Tweet) => {
+    const getTime = (tweet: Tweet) => new Date(tweet.created_at).getTime()
     return getTime(invert ? t2 : t1) - getTime(invert ? t1 : t2)
   }
 
-export const createDateString = (d) => {
+export const createDateString = (d: Date | string | number) => {
   const date = d instanceof Date ? d : new Date(d)
-  const pad = (num) =>
+  const pad = (num: number) =>
     num.toString().length === 1 ? `0${num}` : num.toString()
   const day = date.getDate()
   const month = date.getMonth() + 1
@@ -28,15 +36,18 @@ export const createDateString = (d) => {
   return `${year}-${pad(month)}-${pad(day)}`
 }
 
-export const createDayString = (createdAt) =>
+export const createDayString = (createdAt: Tweet['created_at']) =>
   createdAt.slice(4, 11) + createdAt.slice(-4)
 
-export const sortBy = {
-  random: (tweets, amount) => {
+type SortFunction = (tweets: Tweet[], amount?: number) => Tweet[]
+
+export const sortBy: Record<string, SortFunction> = {
+  random: (tweets, amount = 1) => {
     const randomTweets = []
+    const remainingTweets = [...tweets]
     for (let i = 0; i < amount && i < tweets.length; i++) {
-      const tweetIndex = getRandomInt(0, tweets.length - 1)
-      const tweet = tweets.splice(tweetIndex, 1)[0]
+      const tweetIndex = getRandomInt(0, remainingTweets.length - 1)
+      const tweet = remainingTweets.splice(tweetIndex, 1)[0]
       randomTweets.push(tweet)
     }
     return randomTweets
@@ -51,12 +62,12 @@ export const sortBy = {
       .slice(0, amount)
 }
 
-export const sortModes = {
+export const sortModes: Record<string, { name: string; fn: SortFunction }> = {
   newest: { name: 'Newest', fn: sortBy.newest },
   oldest: { name: 'Oldest', fn: sortBy.oldest },
   random: { name: 'Random', fn: sortBy.random },
   likes: { name: 'Likes', fn: sortBy.likes }
-}
+} as const
 
 export function injectScript() {
   const script = document.createElement('script')
