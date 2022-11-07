@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import styled from 'styled-components'
 import { minify } from 'terser'
 import browserTweetTools, { TweetToolbox } from '../lib/tools'

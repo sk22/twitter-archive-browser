@@ -6,7 +6,7 @@ type RequestDraft = RequestInit & { id: string; url: string }
 
 export default function browserTweetTools(
   callback: Function,
-  args: unknown[]
+  args: Record<string, unknown>
 ): TweetToolbox {
   //#region constants
   const destroyEndpoint = 'https://twitter.com/i/api/1.1/statuses/destroy.json'
@@ -15,7 +15,8 @@ export default function browserTweetTools(
   abortController.signal.addEventListener('abort', () => {
     console.log('aborting mission')
   })
-  const maxConcurrent = 50
+  
+  const maxConcurrent = args.maxConcurrent ?? 100
   //#endregion
 
   //#region helper functions
