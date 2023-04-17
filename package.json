@@ -4,24 +4,22 @@
   "homepage": "https://sk22.github.io/twitter-archive-browser",
   "private": true,
   "dependencies": {
-    "@types/jest": "^29.2.2",
-    "@types/node": "^18.11.9",
-    "@types/react": "^18.0.25",
-    "@types/react-dom": "^18.0.8",
     "jszip": "^3.10.1",
     "lodash": "^4.17.21",
     "lodash.debounce": "^4.0.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "^5.0.1",
-    "styled-components": "^5.3.6",
-    "terser": "^5.15.1",
-    "typescript": "^4.8.4",
-    "use-debounced-effect": "^2.0.1",
-    "web-vitals": "^3.0.4"
+    "styled-components": "^5.3.9",
+    "terser": "^5.16.9",
+    "use-debounced-effect": "^2.0.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.188",
+    "@types/jest": "^29.2.2",
+    "@types/node": "^18.11.9",
+    "@types/react": "^18.0.35",
+    "@types/react-dom": "^18.0.11",
     "@types/styled-components": "^5.1.26",
     "gh-pages": "^4.0.0",
     "prettier": "^2.7.1"
