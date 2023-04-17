@@ -143,7 +143,7 @@ function tweetUtils(callback, args) {
     async getBearerToken() {
       const mainScriptSrc = document.querySelector('script[src*=\\/main]').src
       const mainScriptText = await (await fetch(mainScriptSrc)).text()
-      const findStringsRegex = /="([A-Za-z0-9%]+)"/g
+      const findStringsRegex = /"([A-Za-z0-9%]+)"/g
       let match = null
       let longest = ''
       while ((match = findStringsRegex.exec(mainScriptText))) {
@@ -195,6 +195,6 @@ function tweetUtils(callback, args) {
     }
   }
 
-  callback(utils, args)
+  if (callback) callback(utils, args)
   return utils
 }
