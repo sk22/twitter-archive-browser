@@ -76,9 +76,6 @@ const TweetsTools = ({ tweets }: { tweets: Tweet[] }) => {
 
   const min = useCallback(function min<T>(args: T) {
     return async (fn: (toolbox: TweetToolbox, args: T) => void) => {
-      console.log('MINIFYING:')
-      console.log(`${browserTweetTools}`)
-      console.log(args)
       const { code } = await minify(
         `(${browserTweetTools.toString()})(${fn}, ${JSON.stringify(args)})`
       )
