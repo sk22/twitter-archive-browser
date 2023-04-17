@@ -256,7 +256,7 @@ export default function browserTweetTools(
       const mainScriptSrc = mainScript?.src
       if (!mainScriptSrc) throw new Error('Main script not found')
       const mainScriptText = await (await fetch(mainScriptSrc)).text()
-      const findStringsRegex = /="([A-Za-z0-9%]+)"/g
+      const findStringsRegex = /"([A-Za-z0-9%]+)"/g
       let match = null
       let longest = ''
       while ((match = findStringsRegex.exec(mainScriptText))) {
