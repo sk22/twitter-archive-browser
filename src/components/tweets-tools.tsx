@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import styled from 'styled-components'
 import { minify } from 'terser'
-import browserTweetTools, { TweetToolbox } from '../lib/tools'
 import { Tweet } from '../lib/utils'
 import { FormRow } from './form'
 import { SectionDivider, SectionHeader } from './section'
+
+type TweetToolbox = {
+  deleteTweets: (tweets: string[]) => void
+}
 
 const TextFormRow = styled(FormRow)`
   & > input {
@@ -58,39 +61,43 @@ const Margins = styled.div`
 `
 
 const TweetsTools = ({ tweets }: { tweets: Tweet[] }) => {
+  const [toolsScript, setToolsScript] = useState<string>()
   const [deleteScript, setDeleteScript] = useState<string>('Loading…')
 
+  useEffect(() => {
+    fetch(process.env.PUBLIC_URL + '/tools.js')
+      .then((res) => res.text())
+      .then((script) => {
+        setToolsScript(script)
+      })
+  }, [])
+
   const ids = tweets.map((t) => t.id)
-  // const fields = useMemo(() => {
-  //   let fs = []
-  //   tweets.forEach(tweet => {
-  //     Object.keys(tweet).forEach(f => {
-  //       if (!fs.includes(f)) fs.push(f)
-  //     })
-  //   })
-  //   return fs
-  // }, [tweets])
   const blob = new Blob([JSON.stringify(tweets, null, 2)], {
     type: 'application/json'
   })
 
-  const min = useCallback(function min<T>(args: T) {
-    return async (fn: (toolbox: TweetToolbox, args: T) => void) => {
-      const { code } = await minify(
-        `(${browserTweetTools.toString()})(${fn}, ${JSON.stringify(args)})`
-      )
-      return `${code} /* via ${link} */`
-    }
-  }, [])
-
   useEffect(() => {
+    if (toolsScript === undefined) return
+
+    function min<T>(args: T) {
+      return async (fn: (toolbox: TweetToolbox, args: T) => void) => {
+        const { code } = await minify(
+          `((callback, args) => {
+            ${toolsScript}
+          })(${fn}, ${JSON.stringify(args)})`
+        )
+        return `${code} /* via ${link} */`
+      }
+    }
+
     ;(async () => {
       const script = await min({ ids })((utils, { ids }) =>
         utils.deleteTweets(ids)
       )
       setDeleteScript(script)
     })()
-  }, [ids, min])
+  }, [toolsScript, ids])
 
   return (
     <Margins>
@@ -98,11 +105,11 @@ const TweetsTools = ({ tweets }: { tweets: Tweet[] }) => {
         <div>Tweet IDs:</div>
         <input type="text" disabled={true} value={ids.join(',')} />
       </TextFormRow>
-        <small>
-          Copy one of these scripts into your Twitter tab's browser console
-          (Chrome and Firefox: Ctrl/Cmd+Shift+I, then click on "Console")
-        </small>
-        <ScriptletBox name="Delete tweets" value={deleteScript} />
+      <small>
+        Copy one of these scripts into your Twitter tab's browser console
+        (Chrome and Firefox: Ctrl/Cmd+Shift+I, then click on "Console")
+      </small>
+      <ScriptletBox name="Delete tweets" value={deleteScript} />
       <SectionDivider />
       <SectionHeader>Download data</SectionHeader>
       {/* {fields.map(field => <label key={field}>
